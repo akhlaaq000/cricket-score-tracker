@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CricPop | Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="auth-utils.js"></script>
+    <style>
+        :root {
+            --bg: #030303;
+            --card: #0d0d0d;
+            --border: #1a1a1a;
+            --text: #ffffff;
+            --accent: #8b5cf6;
+        }
+
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+        }
+
+        .neon-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 3rem;
+            transition: all 0.3s ease;
+        }
+
+        .neon-card:hover {
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.05);
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: var(--accent);
+            background: rgba(139, 92, 246, 0.02);
+            outline: none;
+        }
+
+        .shake { animation: shake 0.5s ease-in-out; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        
+        .title-gradient {
+            background: linear-gradient(to right, #fff, #8b5cf6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+    <script>
+        if (typeof isAuthenticated === 'function' && isAuthenticated()) {
+            window.location.replace('dashboard.html');
+        }
+    </script>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+
+    <div id="login-card" class="neon-card p-12 w-full max-w-md">
+        <div class="mb-10">
+            <div class="flex items-center gap-3 text-indigo-500 mb-6">
+                <i class="fas fa-bolt text-2xl"></i>
+                <span class="font-black text-xl tracking-tighter text-white">CRICPOP</span>
+            </div>
+            <h1 class="text-4xl font-black tracking-tighter mb-2 title-gradient">Welcome Back</h1>
+            <p class="text-sm font-bold opacity-40 uppercase tracking-widest">Authorized Access Only</p>
+        </div>
+
+        <div id="error-box" class="hidden mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-3xl text-rose-500 text-xs font-black uppercase tracking-widest text-center">
+            <i class="fas fa-circle-exclamation mr-2"></i> <span id="error-msg"></span>
+        </div>
+
+        <form id="login-form" class="space-y-6">
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 ml-2">Identify Code</label>
+                <div class="relative group">
+                    <i class="fas fa-user absolute left-5 top-1/2 -translate-y-1/2 text-sm opacity-20 group-focus-within:opacity-100 group-focus-within:text-indigo-500 transition"></i>
+                    <input type="text" id="username" required placeholder="Username" autocomplete="username"
+                           class="input-field w-full pl-14 pr-6 py-5 rounded-[2rem] font-bold text-white">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mb-3 ml-2">Security Key</label>
+                <div class="relative group">
+                    <i class="fas fa-lock absolute left-5 top-1/2 -translate-y-1/2 text-sm opacity-20 group-focus-within:opacity-100 group-focus-within:text-indigo-500 transition"></i>
+                    <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password"
+                           class="input-field w-full pl-14 pr-14 py-5 rounded-[2rem] font-bold text-white">
+                    <button type="button" onclick="togglePassword()" class="absolute right-5 top-1/2 -translate-y-1/2 opacity-20 hover:opacity-100 transition">
+                        <i id="pass-icon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" id="submit-btn" class="w-full bg-indigo-600 text-white font-black py-5 rounded-[2rem] hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-600/10 active:scale-95 uppercase tracking-widest text-xs">
+                Enter Arena
+            </button>
+        </form>
+
+        <div class="mt-10 pt-8 border-t border-white/5 text-center">
+            <p class="text-xs font-bold opacity-40 uppercase tracking-widest">
+                New Player? 
+                <a href="signup.html" class="text-indigo-500 ml-2 hover:underline underline-offset-8">Create Profile</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passInput = document.getElementById('password');
+            const icon = document.getElementById('pass-icon');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passInput.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function showError(msg) {
+            const box = document.getElementById('error-box');
+            const card = document.getElementById('login-card');
+            document.getElementById('error-msg').innerText = msg;
+            box.classList.remove('hidden');
+            card.classList.add('shake');
+            setTimeout(() => card.classList.remove('shake'), 500);
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('submit-btn');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && data.token) {
+                        setAuthToken(data.token); 
+                        btn.innerHTML = 'Access Granted';
+                        btn.style.background = '#10b981';
+                        setTimeout(() => window.location.href = 'dashboard.html', 500);
+                    }
+                } else {
+                    showError('Invalid Credentials');
+                    btn.innerHTML = 'Enter Arena';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                showError('Security System Error');
+                btn.innerHTML = 'Enter Arena';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

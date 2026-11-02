@@ -1,0 +1,140 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CricPop | Match Center</title>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="auth-utils.js"></script>
+        <style>
+            :root {
+                --bg: #050505; --card: #111111; --border: #222222; --text: #ffffff;
+                --subtext: #94a3b8; --accent: #8b5cf6;
+            }
+            [data-theme="light"] {
+                --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; --text: #0f172a;
+                --subtext: #64748b; --accent: #6366f1;
+            }
+
+            body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.4s; }
+            #sidebar { width: 72px; transition: 0.3s; background: var(--card); border-right: 1px solid var(--border); overflow: hidden; }
+            #sidebar:hover { width: 260px; }
+            .nav-text { opacity: 0; white-space: nowrap; transition: 0.2s; }
+            #sidebar:hover .nav-text { opacity: 1; }
+
+            .big-score { font-size: 8rem; font-weight: 800; line-height: 0.9; }
+            .glass-panel { background: var(--card); border: 1px solid var(--border); border-radius: 3rem; }
+        </style>
+    </head>
+    <body class="flex min-h-screen">
+
+        <aside id="sidebar" class="fixed h-screen z-50 flex flex-col py-8">
+            <div class="px-7 mb-12 flex items-center gap-4 text-indigo-500">
+                <i class="fas fa-bolt text-2xl"></i>
+                <span class="nav-text font-black text-xl">CRICPOP</span>
+            </div>
+            <nav class="flex-1 px-3">
+                <a href="dashboard.html" class="flex items-center gap-4 p-4 rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                    <span class="nav-text font-bold">Back to Arena</span>
+                </a>
+                <button onclick="toggleTheme()" class="w-full flex items-center gap-4 p-4 rounded-2xl mt-4">
+                    <i class="theme-icon text-xl text-slate-500"></i>
+                    <span class="nav-text font-bold">Appearance</span>
+                </button>
+            </nav>
+        </aside>
+
+      <main class="flex-1 ml-[72px] p-4 lg:p-12 max-w-7xl mx-auto">
+    <div id="series-name" class="text-indigo-500 font-bold uppercase tracking-widest text-xs mb-4"></div>
+    
+    <div id="header" class="mb-12">
+        <h1 id="match-title" class="text-5xl lg:text-7xl font-black tracking-tighter mb-4">Loading Match...</h1>
+        <div class="flex items-center gap-4">
+            <span id="match-status-pill" class="px-4 py-1 rounded-full bg-rose-500 text-white text-xs font-bold animate-pulse hidden">LIVE</span>
+            <p id="match-status-text" class="text-xl lg:text-2xl font-bold opacity-60 italic"></p>
+        </div>
+    </div>
+
+    <div id="scores-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="glass-panel p-10 relative overflow-hidden group">
+            <div id="batting-1" class="hidden absolute top-0 right-0 p-4 bg-indigo-500 text-white rounded-bl-2xl">
+                <i class="fas fa-baseball-bat-ball"></i> BATTING
+            </div>
+            <p id="t1-name" class="text-xs font-black opacity-40 uppercase tracking-widest mb-8">Team 1</p>
+            <div class="flex items-baseline">
+                <span id="t1-runs" class="big-score">0</span>
+                <span id="t1-wickets" class="text-4xl opacity-20 ml-4">/ 0</span>
+            </div>
+            <p id="t1-overs" class="text-xl font-bold mt-8 opacity-50">Overs: 0.0</p>
+        </div>
+
+        <div class="glass-panel p-10 relative overflow-hidden">
+            <div id="batting-2" class="hidden absolute top-0 right-0 p-4 bg-indigo-500 text-white rounded-bl-2xl">
+                <i class="fas fa-baseball-bat-ball"></i> BATTING
+            </div>
+            <p id="t2-name" class="text-xs font-black opacity-40 uppercase tracking-widest mb-8">Team 2</p>
+            <div class="flex items-baseline">
+                <span id="t2-runs" class="big-score">0</span>
+                <span id="t2-wickets" class="text-4xl opacity-20 ml-4">/ 0</span>
+            </div>
+            <p id="t2-overs" class="text-xl font-bold mt-8 opacity-50">Overs: 0.0</p>
+        </div>
+    </div>
+
+    <div class="mt-12 glass-panel p-8 bg-indigo-500/5 border-indigo-500/20">
+        <h3 class="text-sm font-black text-indigo-500 uppercase tracking-widest mb-4">Live Commentary</h3>
+        <p id="match-commentary" class="text-2xl font-bold leading-snug"></p>
+    </div>
+</main>
+
+<script>
+    const matchId = new URLSearchParams(window.location.search).get('id');
+
+    async function load() {
+    try {
+        const res = await fetchWithAuth(`/api/matches/details/${matchId}`);
+        const data = await res.json();
+        
+        console.log("API Response:", data); // Debugging line: Check your console!
+
+        const t1 = data.T1?.[0] || { Nm: 'TBD' };
+        const t2 = data.T2?.[0] || { Nm: 'TBD' };
+
+        // Fix: Use optional chaining (?.) to prevent "undefined" crashes
+        document.getElementById('series-name').innerText = data.Stg?.Snm || "Match Detail";
+        document.getElementById('match-title').innerText = `${t1.Nm} vs ${t2.Nm}`;
+        document.getElementById('match-status-text').innerText = data.EpsL || "Status Unavailable";
+        document.getElementById('match-commentary').innerText = data.ECo || "No commentary available";
+        
+        // Scores Team 1
+        document.getElementById('t1-name').innerText = t1.Nm;
+        document.getElementById('t1-runs').innerText = data.Tr1C1 || "0";
+        document.getElementById('t1-wickets').innerText = data.Tr1CW1 ? `/ ${data.Tr1CW1}` : "/ 0";
+        document.getElementById('t1-overs').innerText = `Overs: ${data.Tr1CO1 || "0.0"}`;
+
+        // Scores Team 2
+        document.getElementById('t2-name').innerText = t2.Nm;
+        document.getElementById('t2-runs').innerText = data.Tr2C1 || "0";
+        document.getElementById('t2-wickets').innerText = data.Tr2CW1 ? `/ ${data.Tr2CW1}` : "/ 0";
+        document.getElementById('t2-overs').innerText = `Overs: ${data.Tr2CO1 || "0.0"}`;
+
+    } catch (e) {
+        console.error("Load failed", e);
+    }
+}
+
+
+
+    if (requireAuth()) {
+        window.onload = load;
+        // Auto-refresh every 30 seconds
+        setInterval(load, 30000);
+    }
+</script>
+
+
+    </body>
+    </html>

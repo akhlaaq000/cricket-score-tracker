@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CricPop | Live Arena</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="auth-utils.js"></script>
+    <style>
+        :root {
+            --bg: #030303; --card: #0d0d0d; --border: #1a1a1a; 
+            --text: #ffffff; --title-grad: linear-gradient(to right, #fff, #8b5cf6);
+            --accent: #8b5cf6; --search-bg: #0d0d0d;
+        }
+        [data-theme="light"] {
+            --bg: #ffffff; --card: #f8fafc; --border: #e2e8f0; 
+            --text: #0f172a; --title-grad: linear-gradient(to right, #0f172a, #4f46e5);
+            --accent: #4f46e5; --search-bg: #f1f5f9;
+        }
+
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; }
+
+        /* Sidebar Visibility */
+        #sidebar { 
+            width: 72px; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+            background: var(--card); border-right: 1px solid var(--border);
+        }
+        #sidebar:hover { width: 260px; }
+        .nav-text { opacity: 0; white-space: nowrap; transition: 0.2s; pointer-events: none; }
+        #sidebar:hover .nav-text { opacity: 1; pointer-events: auto; }
+
+        /* Title Visibility Fix */
+        .big-title {
+            font-size: clamp(3rem, 10vw, 6rem); font-weight: 800;
+            background: var(--title-grad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .neon-card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 2.5rem;
+            transition: 0.4s; position: relative; overflow: hidden;
+        }
+        .neon-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+        }
+
+        /* Filter Active State */
+        .filter-active {
+            background: var(--accent) !important;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+    </style>
+</head>
+
+<body class="flex min-h-screen">
+
+    <aside id="sidebar" class="fixed h-screen z-50 flex flex-col py-8 overflow-hidden">
+        <div class="px-7 mb-12 flex items-center gap-4 text-indigo-500">
+            <i class="fas fa-baseball-bat-ball text-2xl animate-pulse"></i>
+            <span class="nav-text font-black text-xl tracking-tighter">CRICPOP</span>
+        </div>
+        
+        <nav class="flex-1 px-3 space-y-2">
+            <a href="dashboard.html" class="flex items-center gap-4 p-4 rounded-2xl bg-indigo-500/10 text-indigo-500">
+                <i class="fas fa-house text-xl"></i>
+                <span class="nav-text font-bold">Dashboard</span>
+            </a>
+            <button onclick="toggleTheme()" class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-black/5 dark:hover:bg-white/5 transition">
+                <i class="theme-icon text-xl text-slate-500"></i>
+                <span class="nav-text font-bold">Switch Theme</span>
+            </button>
+        </nav>
+
+        <div class="px-3 pt-4 border-t border-slate-500/10">
+            <button onclick="logout()" class="w-full flex items-center gap-4 p-4 rounded-2xl text-rose-500 hover:bg-rose-500/10 transition group">
+                <i class="fas fa-power-off text-xl"></i>
+                <span class="nav-text font-bold">Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <main class="flex-1 ml-[72px] p-8 lg:p-16">
+        <header class="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-10 mb-20">
+            <div>
+                <p id="live-count-header" class="text-indigo-500 font-bold tracking-widest text-xs uppercase mb-2">Syncing...</p>
+                <h1 class="big-title tracking-tighter">Arena.</h1>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4 w-full xl:w-auto">
+                <div class="relative flex-1 min-w-[300px]">
+                    <i class="fas fa-search absolute left-6 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="search" placeholder="Search matches..." 
+                           class="w-full pl-16 pr-6 py-5 bg-[var(--search-bg)] border border-[var(--border)] rounded-[2rem] outline-none focus:border-indigo-500 transition text-lg">
+                </div>
+                
+                <button id="liveFilterBtn" onclick="toggleLiveFilter()" 
+                        class="px-8 py-5 rounded-[2rem] border border-[var(--border)] bg-[var(--card)] font-bold text-sm transition flex items-center gap-3">
+                    <i class="fas fa-circle text-[8px] animate-pulse text-rose-500"></i>
+                    LIVE ONLY
+                </button>
+
+                <button onclick="loadDashboard(currentOffset)" class="p-5 bg-[var(--card)] border border-[var(--border)] rounded-full hover:bg-indigo-500 hover:text-white transition group">
+                    <i class="fas fa-sync-alt group-active:rotate-180 transition-transform duration-500"></i>
+                </button>
+            </div>
+        </header>
+
+        <div id="matchGrid" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-10"></div>
+
+        <footer class="mt-20 flex justify-center items-center gap-4">
+            <button onclick="changeOffset(-25)" class="p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-indigo-500 transition">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div id="pageIndicator" class="px-6 py-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-500 font-bold text-sm">
+                Offset: 0
+            </div>
+            <button onclick="changeOffset(25)" class="p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-indigo-500 transition">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </footer>
+    </main>
+
+    <style>
+        /* Add this to your <style> section */
+        @keyframes card-appear {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .match-card {
+            animation: card-appear 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            opacity: 0;
+        }
+    </style>
+
+    <script>
+        let allMatches = [];
+        let liveFilterActive = false;
+        let currentOffset = 0;
+
+        async function loadDashboard(offset = 0) {
+            currentOffset = offset;
+            document.getElementById('pageIndicator').innerText = `Offset: ${offset}`;
+            document.getElementById('matchGrid').innerHTML = '<div class="col-span-full text-center py-20 opacity-50"><i class="fas fa-spinner fa-spin text-4xl mb-4"></i><p>Fetching data...</p></div>';
+
+            try {
+                // Now passing the offset to your Java backend
+                const res = await fetchWithAuth(`/api/dashboard/summary?offset=${offset}`);
+                const data = await res.json();
+                allMatches = data.matches || [];
+                document.getElementById('live-count-header').innerText = `${data.stats.liveCount} Matches Active`;
+                render();
+            } catch (e) { 
+                console.error(e); 
+                document.getElementById('matchGrid').innerHTML = '<p class="col-span-full text-center text-rose-500">Failed to load Arena data.</p>';
+            }
+        }
+
+        function changeOffset(delta) {
+            const nextOffset = Math.max(0, currentOffset + delta);
+            if (nextOffset !== currentOffset) loadDashboard(nextOffset);
+        }
+
+        function toggleLiveFilter() {
+            liveFilterActive = !liveFilterActive;
+            document.getElementById('liveFilterBtn').classList.toggle('filter-active', liveFilterActive);
+            render();
+        }
+
+        function render() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const grid = document.getElementById('matchGrid');
+            
+            const filtered = allMatches.filter(m => {
+                const searchMatch = (m.matchName || "").toLowerCase().includes(query) || (m.venue || "").toLowerCase().includes(query);
+                const isLive = !m.status.toLowerCase().includes('won') && !m.status.toLowerCase().includes('result');
+                return liveFilterActive ? (searchMatch && isLive) : searchMatch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p class="col-span-full text-center py-20 opacity-50 text-xl">No matches found in this sector.</p>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map((m, index) => {
+                const isLive = !m.status.toLowerCase().includes('won') && !m.status.toLowerCase().includes('result');
+                // Added staggered animation delay
+                return `
+                    <div class="neon-card match-card p-10 cursor-pointer" 
+                         style="animation-delay: ${index * 0.05}s"
+                         onclick="location.href='match-details.html?id=${m.matchId}'">
+                        <div class="flex justify-between items-center mb-8">
+                            <span class="text-[10px] font-black tracking-widest opacity-40 uppercase">${m.matchType}</span>
+                            ${isLive ? '<span class="text-rose-500 font-bold text-[10px] flex items-center gap-2"><span class="w-2 h-2 bg-rose-500 rounded-full animate-ping"></span> LIVE</span>' : ''}
+                        </div>
+                        <h3 class="text-2xl font-black mb-4 leading-tight">${m.matchName}</h3>
+                        <p class="text-sm opacity-60 mb-10"><i class="fas fa-map-pin mr-2 text-indigo-500"></i> ${m.venue}</p>
+                        <div class="bg-indigo-500/5 p-6 rounded-3xl border border-indigo-500/10">
+                            <p class="text-lg font-bold italic opacity-90">${m.status}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('search').addEventListener('input', render);
+        if (requireAuth()) window.onload = () => loadDashboard(0);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CricPop | Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="auth-utils.js"></script>
+    <style>
+        :root {
+            --bg: #030303; --card: #0d0d0d; --border: #1a1a1a; 
+            --text: #ffffff; --accent: #8b5cf6; --muted: rgba(255,255,255,0.4);
+        }
+        /* When data-theme is light, we redefine the SAME variables */
+        [data-theme="light"] {
+            --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0; 
+            --text: #0f172a; --accent: #6366f1; --muted: rgba(15,23,42,0.6);
+        }
+
+        /* Use the variables on the body */
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            transition: background-color 0.4s, color 0.4s; 
+            overflow-x: hidden; 
+        }
+        
+        /* Apply variables to UI components */
+        #sidebar, .neon-card { background-color: var(--card); border-color: var(--border); }
+        .text-opacity-custom { color: var(--muted); }
+        h1, h2, h3, .text-white-custom { color: var(--text); }
+
+        #sidebar { 
+            width: 72px; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-right: 1px solid var(--border); 
+            overflow: hidden; z-index: 100;
+        }
+        #sidebar:hover { width: 260px; }
+        .nav-text { opacity: 0; white-space: nowrap; transition: 0.2s; font-weight: 700; }
+        #sidebar:hover .nav-text { opacity: 1; }
+
+        .neon-card { border: 1px solid var(--border); border-radius: 2.5rem; transition: all 0.3s ease; }
+        .neon-card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        
+        .hero-gradient {
+            background: linear-gradient(to right, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+
+    <script>
+        // Move this to head to prevent white flash
+        function applyTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+        }
+        // Run immediately when body exists
+        window.addEventListener('DOMContentLoaded', applyTheme);
+
+        function toggleTheme() {
+            const body = document.body;
+            const target = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', target);
+            localStorage.setItem('theme', target);
+        }
+    </script>
+</head>
+<body class="flex min-h-screen">
+
+    <aside id="sidebar" class="fixed h-screen flex flex-col py-8">
+        <div class="px-7 mb-12 flex items-center gap-4 text-indigo-500">
+            <i class="fas fa-bolt text-2xl"></i>
+            <span class="nav-text font-black text-xl text-white">CRICPOP</span>
+        </div>
+        
+        <nav class="flex-1 px-3 space-y-2">
+            <a href="index.html" class="flex items-center gap-4 p-4 rounded-2xl bg-indigo-500/10 text-indigo-500 transition">
+                <i class="fas fa-home text-xl"></i>
+                <span class="nav-text">Home</span>
+            </a>
+            <a href="dashboard.html" class="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition">
+                <i class="fas fa-grid-2 text-xl opacity-50"></i>
+                <span class="nav-text">Live Arena</span>
+            </a>
+            <a href="login.html" class="flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition">
+                <i class="fas fa-user text-xl opacity-50"></i>
+                <span class="nav-text">Account</span>
+            </a>
+        </nav>
+
+        <div class="px-3 border-t border-white/5 pt-4">
+            <button onclick="toggleTheme()" class="w-full flex items-center gap-4 p-4 rounded-2xl hover:bg-white/5 transition">
+                <i class="fas fa-circle-half-stroke text-xl text-slate-500"></i>
+                <span class="nav-text">Appearance</span>
+            </button>
+        </div>
+    </aside>
+<main class="flex-1 ml-[72px] relative">
+    <header class="w-full px-10 py-6 flex justify-between items-center">
+        <div></div>
+        <div class="flex gap-4">
+            <a href="login.html" class="px-6 py-3 font-bold text-sm hover:opacity-70 transition">Member Login</a>
+            <a href="signup.html" class="bg-indigo-600 text-white px-6 py-3 rounded-full font-black text-sm hover:scale-105 transition shadow-lg shadow-indigo-600/20">Create Free Account</a>
+        </div>
+    </header>
+
+    <section class="max-w-6xl mx-auto px-10 pt-20 pb-32 text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/5 border border-indigo-500/10 text-indigo-500 text-[10px] font-black uppercase tracking-[0.2em] mb-8">
+            <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span>
+            Now Live: The 2026 Cricket Season
+        </div>
+        
+        <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9]">
+            The Best Seat In <br><span class="hero-gradient">The House.</span>
+        </h1>
+        
+        <p class="text-lg md:text-xl opacity-40 font-medium max-w-2xl mx-auto mb-12 leading-relaxed">
+            From every boundary to every wicket, follow the game with unmatched speed. Get the full story behind every ball, every match, and every series across the globe.
+        </p>
+
+        <div class="flex flex-wrap justify-center gap-6">
+            <a href="dashboard.html" class="bg-indigo-600 text-white px-10 py-5 rounded-[2rem] font-black text-sm uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-2xl shadow-indigo-600/20 active:scale-95">
+                View Live Scores
+            </a>
+            <a href="#features" class="px-10 py-5 rounded-[2rem] border border-white/10 font-black text-sm uppercase tracking-widest hover:bg-white/5 transition-all">
+                Why CricPop?
+            </a>
+        </div>
+    </section>
+
+    <div class="max-w-7xl mx-auto px-10 mb-20 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-6 border-r border-white/5">
+            <div class="text-3xl font-black">Live</div>
+            <div class="text-[10px] font-black opacity-30 uppercase tracking-widest mt-1">Ball-by-Ball</div>
+        </div>
+        <div class="text-center p-6 border-r border-white/5">
+            <div class="text-3xl font-black">Full</div>
+            <div class="text-[10px] font-black opacity-30 uppercase tracking-widest mt-1">Scorecards</div>
+        </div>
+        <div class="text-center p-6 border-r border-white/5">
+            <div class="text-3xl font-black">Pro</div>
+            <div class="text-[10px] font-black opacity-30 uppercase tracking-widest mt-1">Match Stats</div>
+        </div>
+        <div class="text-center p-6">
+            <div class="text-3xl font-black">24/7</div>
+            <div class="text-[10px] font-black opacity-30 uppercase tracking-widest mt-1">Global Feed</div>
+        </div>
+    </div>
+
+    <section id="features" class="max-w-7xl mx-auto px-10 pb-32 grid md:grid-cols-3 gap-8">
+        <div class="neon-card p-10">
+            <div class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-500 mb-8">
+                <i class="fas fa-tv text-xl"></i>
+            </div>
+            <h3 class="text-xl font-black mb-4">Complete Match Center</h3>
+            <p class="text-sm opacity-40 font-bold leading-relaxed">
+                Stay updated with total runs, wickets, and overs for both teams. Our match center gives you a clear view of the game's progress as it happens.
+            </p>
+        </div>
+
+        <div class="neon-card p-10">
+            <div class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-500 mb-8">
+                <i class="fas fa-microphone-alt text-xl"></i>
+            </div>
+            <h3 class="text-xl font-black mb-4">Real-Time Commentary</h3>
+            <p class="text-sm opacity-40 font-bold leading-relaxed">
+                Follow every delivery with live text commentary. Get notified about milestones, big hits, and game-changing moments instantly.
+            </p>
+        </div>
+
+        <div class="neon-card p-10">
+            <div class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-indigo-500 mb-8">
+                <i class="fas fa-trophy text-xl"></i>
+            </div>
+            <h3 class="text-xl font-black mb-4">All Major Leagues</h3>
+            <p class="text-sm opacity-40 font-bold leading-relaxed">
+                Whether it's International Tests, T20 World Cups, or the IPL, follow all your favorite teams and tournaments in one place.
+            </p>
+        </div>
+    </section>
+
+    <section class="max-w-4xl mx-auto px-10 pb-32 text-center">
+        <h4 class="text-xs font-black text-indigo-500 uppercase tracking-[0.3em] mb-6">Designed For Fans</h4>
+        <p class="text-2xl font-bold leading-snug opacity-80 italic">
+            "We believe following cricket should be as exciting as playing it. We bring you the pulse of the pitch, wherever you are."
+        </p>
+    </section>
+
+    <footer class="py-20 border-t border-white/5 text-center">
+        <div class="flex justify-center gap-8 mb-8 opacity-40">
+            <a href="#" class="hover:text-indigo-500 transition"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="hover:text-indigo-500 transition"><i class="fab fa-instagram"></i></a>
+            <a href="#" class="hover:text-indigo-500 transition"><i class="fab fa-facebook"></i></a>
+        </div>
+        <p class="text-[10px] font-black opacity-20 uppercase tracking-[0.5em]">&copy; 2026 CRICPOP ARENA // THE HOME OF LIVE CRICKET</p>
+    </footer>
+</main>
+
+   
+</body>
+</html>

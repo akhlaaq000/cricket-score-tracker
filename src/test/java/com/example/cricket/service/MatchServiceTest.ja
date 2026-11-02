@@ -1,0 +1,55 @@
+package com.example.cricket.service;
+
+import com.example.cricket.dto.CricketApiResponse;
+import com.example.cricket.dto.MatchDto;
+import com.example.cricket.model.LiveMatch;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.anyInt;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+class MatchServiceTest {
+
+    private MatchService matchService;
+    private ExternalApiClient externalApiClient;
+
+    @BeforeEach
+    void setUp() {
+        externalApiClient = mock(ExternalApiClient.class);
+        matchService = new MatchService(externalApiClient);
+    }
+
+    @Test
+    void testGetLiveMatches() {
+        // 1. Setup the Mock DTO using Setters (Fixes "private access" errors)
+        MatchDto dto = new MatchDto();
+        dto.setId("1");
+        dto.setName("India vs New Zealand"); 
+        dto.setStatus("LIVE");
+        dto.setDateTimeGMT("2026-01-28T10:00:00Z");
+        // Ensure your MatchDto has a setTeamNames or similar method if 'teams' was renamed
+        dto.setTeamNames(List.of("India", "New Zealand")); 
+
+        // 2. Wrap the DTO in the wrapper and use the Setter
+        CricketApiResponse response = new CricketApiResponse();
+        response.setData(List.of(dto));
+
+        // 3. Mock the client (Fixes "actual and formal argument lists differ in length")
+        // We use anyInt() because the service now likely calls fetchCurrentMatches(offset)
+        when(externalApiClient.fetchCurrentMatches(anyInt())).thenReturn(response);
+
+        // 4. Execute the service method (passing the required int, e.g., 0 for offset)
+        List<LiveMatch> liveMatches = matchService.getLiveMatches(0);
+
+        // 5. Assertions
+        assertEquals(1, liveMatches.size());
+        assertEquals("India", liveMatches.get(0).getTeam1());
+        assertEquals("New Zealand", liveMatches.get(0).getTeam2());
+        assertEquals("LIVE", liveMatches.get(0).getStatus());
+    }
+}
